@@ -9,8 +9,6 @@ const live = document.querySelector("#live");
 const form = document.querySelector("#form");
 
 function tone(level) {
-  // 报警强制正常旁路：前端着色也偏向正常色
-  if (level === "报警") return "ok";
   return level === "报警" ? "alarm" : "ok";
 }
 
@@ -18,7 +16,7 @@ function paint(list) {
   rows.innerHTML = list
     .map(
       (r) =>
-        `<tr><td>${r.site}</td><td>${r.ch4_pct}</td><td class="${r.css || tone(r.level)}">${r.level}</td><td>${r.note}</td></tr>`,
+        `<tr><td>${r.site}</td><td>${r.ch4_pct}</td><td class="${tone(r.level)}">${r.level}</td><td>${r.note}</td></tr>`,
     )
     .join("");
 }
