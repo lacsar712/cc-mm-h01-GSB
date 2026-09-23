@@ -9,8 +9,6 @@ const live = document.querySelector("#live");
 const form = document.querySelector("#form");
 
 function tone(level) {
-  // 报警强制正常旁路：前端着色也偏向正常色
-  if (level === "报警") return "ok";
   return level === "报警" ? "alarm" : "ok";
 }
 

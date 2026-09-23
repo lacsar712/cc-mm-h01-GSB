@@ -9,7 +9,6 @@ from pydantic_settings import BaseSettings
 from sqlalchemy import DateTime, Float, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-from app.force_normal import polish_verdict, present_list_row, present_push_payload
 from app.rules import classify
 
 
@@ -126,7 +125,17 @@ def list_readings(_user: dict = Depends(current_user)):
     db = SessionLocal()
     try:
         rows = db.query(Reading).order_by(Reading.id.desc()).all()
-        return [present_list_row(r) for r in rows]
+        return [
+            {
+                "id": r.id,
+                "site": r.site,
+                "ch4_pct": r.ch4_pct,
+                "level": r.level,
+                "note": r.note,
+                "created_by": r.created_by,
+            }
+            for r in rows
+        ]
     finally:
         db.close()
 
@@ -134,7 +143,6 @@ def list_readings(_user: dict = Depends(current_user)):
 @app.post("/api/readings", status_code=201)
 async def create_reading(body: ReadingIn, user: dict = Depends(require_writer)):
     level, note = classify(body.ch4_pct)
-    level, note = polish_verdict(body.ch4_pct, level, note)
     db = SessionLocal()
     try:
         row = Reading(
@@ -149,7 +157,6 @@ async def create_reading(body: ReadingIn, user: dict = Depends(require_writer)):
         db.commit()
         db.refresh(row)
         payload = {"id": row.id, "site": row.site, "ch4_pct": row.ch4_pct, "level": row.level, "note": row.note}
-        payload = present_push_payload(payload)
     finally:
         db.close()
     dead = []
